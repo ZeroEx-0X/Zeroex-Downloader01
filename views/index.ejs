@@ -7,24 +7,34 @@
     <link rel="stylesheet" href="/style.css">
 </head>
 <body>
-    <h1>Zeroex Downloader</h1>
+    <div class="container">
+        <h1>Zeroex Downloader</h1>
 
-    <h2>Music Downloader</h2>
-    <form action="/download-music" method="POST">
-        <input type="text" name="url" placeholder="Enter Spotify or Cloud Music URL" required>
-        <button type="submit">Download</button>
-    </form>
+        <div class="grid">
+            <div class="box">
+                <h2>Music Downloader</h2>
+                <form action="/download-music" method="POST">
+                    <input type="text" name="url" placeholder="Enter Spotify/Cloud URL" required>
+                    <button type="submit">Download</button>
+                </form>
+            </div>
 
-    <h2>Video Downloader</h2>
-    <form action="/download-video" method="POST">
-        <input type="text" name="url" placeholder="Enter Video URL" required>
-        <button type="submit">Download</button>
-    </form>
+            <div class="box">
+                <h2>Video Downloader</h2>
+                <form action="/download-video" method="POST">
+                    <input type="text" name="url" placeholder="Enter Video URL" required>
+                    <button type="submit">Download</button>
+                </form>
+            </div>
 
-    <h2>YouTube Downloader</h2>
-    <form action="/download-youtube" method="POST">
-        <input type="text" name="url" placeholder="Enter YouTube URL" required>
-        <button type="submit">Download</button>
-    </form>
+            <div class="box">
+                <h2>YouTube Downloader</h2>
+                <form action="/download-youtube" method="POST">
+                    <input type="text" name="url" placeholder="Enter YouTube URL" required>
+                    <button type="submit">Download</button>
+                </form>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
