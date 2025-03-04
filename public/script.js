@@ -6,15 +6,13 @@ async function downloadVideo() {
     const data = await response.json();
 
     if (data.error) {
-        document.getElementById("videoResults").innerHTML = "Error fetching video.";
+        document.getElementById("videoResults").innerHTML = "<p>Error fetching video.</p>";
         return;
     }
 
     document.getElementById("videoResults").innerHTML = `
-        <p><strong>${data.data.title}</strong></p>
-        <img src="${data.data.thumbnail || 'https://via.placeholder.com/150'}" alt="Thumbnail">
-        <p><a href="${data.data.high}" target="_blank">Download High Quality</a></p>
-        <p><a href="${data.data.low}" target="_blank">Download Low Quality</a></p>
+        <button class="download-btn" onclick="window.open('${data.data.high}', '_blank')">Download High Quality</button>
+        <button class="download-btn" onclick="window.open('${data.data.low}', '_blank')">Download Low Quality</button>
     `;
 }
 
@@ -26,12 +24,11 @@ async function downloadMusic() {
     const data = await response.json();
 
     if (data.error) {
-        document.getElementById("musicResults").innerHTML = "Error fetching music.";
+        document.getElementById("musicResults").innerHTML = "<p>Error fetching music.</p>";
         return;
     }
 
     document.getElementById("musicResults").innerHTML = `
-        <p><strong>${data.data.title}</strong></p>
-        <p><a href="${data.data.audio}" target="_blank">Download Music</a></p>
+        <button class="download-btn" onclick="window.open('${data.data.audio}', '_blank')">Download Music</button>
     `;
 }
