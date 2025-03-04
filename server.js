@@ -7,8 +7,8 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.static("public"));
 
-const VIDEO_API = "https://nayan-video-downloader.vercel.app/alldown?url=";
-const SPOTIFY_API = "https://nayan-video-downloader.vercel.app/spotifyDl?url=";
+const VIDEO_API = "#";
+const SPOTIFY_API = "#";
 
 // Video Downloader Route
 app.get("/download/video", async (req, res) => {
