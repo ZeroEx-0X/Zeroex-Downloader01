@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zeroex Downloader</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+        .container { max-width: 600px; margin: auto; }
+        input, button { padding: 10px; margin: 10px; width: 80%; }
+        .download-links { margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h1>Zeroex Downloader</h1>
+    
+    <div class="container">
+        <h3>Video Downloader</h3>
+        <input type="text" id="videoUrl" placeholder="Enter Video URL">
+        <button onclick="fetchVideo()">Download</button>
+        <div class="download-links" id="videoLinks"></div>
+
+        <h3>YouTube Downloader</h3>
+        <input type="text" id="ytUrl" placeholder="Enter YouTube URL">
+        <button onclick="fetchYouTube()">Download</button>
+        <div class="download-links" id="ytLinks"></div>
+
+        <h3>Music Downloader</h3>
+        <input type="text" id="musicUrl" placeholder="Enter Music URL">
+        <button onclick="fetchMusic()">Download</button>
+        <div class="download-links" id="musicLinks"></div>
+    </div>
+
+    <script>
+        async function fetchVideo() {
+            const url = document.getElementById("videoUrl").value;
+            if (!url) return alert("Enter a video URL!");
+            const res = await fetch(`/download/video?url=${encodeURIComponent(url)}`);
+            const data = await res.json();
+            if (data.status) {
+                document.getElementById("videoLinks").innerHTML = `
+                    <a href="${data.data.low}" target="_blank">Download Low Quality</a><br>
+                    <a href="${data.data.high}" target="_blank">Download High Quality</a>
+                `;
+            } else alert("Failed to fetch video");
+        }
+
+        async function fetchYouTube() {
+            const url = document.getElementById("ytUrl").value;
+            if (!url) return alert("Enter a YouTube URL!");
+            const res = await fetch(`/download/youtube?url=${encodeURIComponent(url)}`);
+            const data = await res.json();
+            if (data.status) {
+                document.getElementById("ytLinks").innerHTML = `
+                    <a href="${data.data.video}" target="_blank">Download 360p</a><br>
+                    <a href="${data.data.video_hd}" target="_blank">Download 720p</a>
+                `;
+            } else alert("Failed to fetch YouTube video");
+        }
+
+        async function fetchMusic() {
+            const url = document.getElementById("musicUrl").value;
+            if (!url) return alert("Enter a music URL!");
+            const res = await fetch(`/download/music?url=${encodeURIComponent(url)}`);
+            const data = await res.json();
+            if (data.status) {
+                document.getElementById("musicLinks").innerHTML = `
+                    <a href="${data.data.audio}" target="_blank">Download MP3</a>
+                `;
+            } else alert("Failed to fetch music");
+        }
+    </script>
+</body>
+</html>
