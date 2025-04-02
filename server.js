@@ -1,94 +1,86 @@
 const express = require("express");
 const axios = require("axios");
-const bodyParser = require("body-parser");
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
+const cors = require("cors");
 
 const app = express();
-const port = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3050;
 
-// Middleware
-app.use(express.static("public"));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
-app.set("view engine", "ejs");
+// Enable CORS for all routes
+app.use(cors());
 
-// Routes
-app.get("/", (req, res) => res.render("index"));
-app.get("/chatbot", (req, res) => res.render("chatbot"));
-app.get("/downloader", (req, res) => res.render("downloader"));
-app.get("/rmbg", (req, res) => res.render("removebg"));
-app.get("/imagine", (req, res) => res.render("imagine"));
+// Serve static files from the "public" folder
+app.use(express.static(path.join(__dirname, "public")));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// API for Chatbot
+const upload = multer({ dest: "uploads/" });
+
+// Serve the main views
+app.get("/", (req, res) => res.sendFile(path.join(__dirname, "views", "index.html")));
+app.get("/chatbot", (req, res) => res.sendFile(path.join(__dirname, "views", "chatbot.html")));
+app.get("/downloader", (req, res) => res.sendFile(path.join(__dirname, "views", "downloader.html")));
+app.get("/rmbg", (req, res) => res.sendFile(path.join(__dirname, "views", "removebg.html")));
+app.get("/imagine", (req, res) => res.sendFile(path.join(__dirname, "views", "imagine.html")));
+
+// ChatBot API
 app.post("/chatbot/api", async (req, res) => {
   try {
-    const userMessage = req.body.message;
-    const response = await axios.get(
-      `https://zerox-chat-bot-api.onrender.com/chat?query=${encodeURIComponent(userMessage)}`
-    );
-    res.json({ reply: response.data.reply });
+    const { message } = req.body;
+    const response = await axios.post("https://zerox-chat-bot-api.onrender.com/chat", { message });
+    res.json(response.data);
   } catch (error) {
-    res.status(500).json({ error: "Chatbot API failed" });
+    res.status(500).json({ error: "Chatbot API error" });
   }
 });
 
-// API for Downloader
+// Video Downloader API
 app.post("/downloader/api", async (req, res) => {
   try {
     const { url } = req.body;
-    const response = await axios.get(`https://nayan-video-downloader.vercel.app/alldown?url=${encodeURIComponent(url)}`);
+    const response = await axios.get(`https://nayan-video-downloader.vercel.app/alldown?url=${url}`);
     res.json(response.data);
   } catch (error) {
-    res.status(500).json({ error: "Downloader API failed" });
+    res.status(500).json({ error: "Downloader API error" });
   }
 });
 
-// Multer for RemoveBG
-const upload = multer({ dest: "uploads/" });
-
+// Remove Background API
 app.post("/rmbg/api", upload.single("image"), async (req, res) => {
   try {
-    const API_KEYS = [
-      "y5K9ssQnhr8sB9Tp4hrMsLtU",
-      "s6d6EanXm7pEsck9zKjgnJ5u",
-      "GJkFyR3WdGAwn8xW5MDYAVWf",
-      "xHSGza4zdY8KsHGpQs4phRx9",
-      "ymutgb6hEYEDR6xUbfQUiPri",
-      "m6AhtWhWJBAPqZzy5BrvMmUp",
-      "ZLTgza4FPGii1AEUmZpkzYb7"
-    ];
+    const API_KEYS = ["y5K9ssQnhr8sB9Tp4hrMsLtU", "s6d6EanXm7pEsck9zKjgnJ5u"];
     const apiKey = API_KEYS[Math.floor(Math.random() * API_KEYS.length)];
-    const imagePath = req.file.path;
-
-    const response = await axios.post("https://api.remove.bg/v1.0/removebg", fs.readFileSync(imagePath), {
-      headers: {
-        "X-Api-Key": apiKey,
-        "Content-Type": "application/octet-stream"
-      },
-      responseType: "arraybuffer"
+    const response = await axios.post("https://api.remove.bg/v1.0/removebg", {
+      headers: { "X-Api-Key": apiKey }
     });
-
-    fs.writeFileSync("public/removed-bg.png", response.data);
+    // This assumes the image will be stored as "/removed-bg.png"
     res.json({ imageUrl: "/removed-bg.png" });
   } catch (error) {
-    res.status(500).json({ error: "RemoveBG API failed" });
+    res.status(500).json({ error: "RemoveBG API error" });
   }
 });
 
-// API for Imagine
+// Imagine AI API
 app.post("/imagine/api", async (req, res) => {
   try {
-    const prompt = req.body.prompt;
-    const response = await axios.get(
-      `https://rubish-apihub.onrender.com/rubish//sdxl?prompt=${encodeURIComponent(prompt)}&apikey=rubish69`
-    );
-    res.json({ imageUrl: response.data.image_url });
+    const { prompt } = req.body;
+    const apiUrl = `https://rubish-apihub.onrender.com/rubish//sdxl?prompt=${encodeURIComponent(prompt)}&apikey=rubish69`;
+
+    const response = await axios.get(apiUrl);
+    // Assuming the API returns a base64 image or an image URL
+    if (response.data && response.data.image) {
+      res.json({ imageUrl: response.data.image });
+    } else {
+      res.status(500).json({ error: "Failed to generate image. Try again!" });
+    }
   } catch (error) {
-    res.status(500).json({ error: "Imagine API failed" });
+    res.status(500).json({ error: "Imagine API error" });
   }
 });
 
-// Start Server
-app.listen(port, () => console.log(`Server running on port ${port}`));
+// Start the server
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
+});
