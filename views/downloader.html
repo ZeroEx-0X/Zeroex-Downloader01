@@ -1,19 +1,45 @@
-<h2>Zeroex Downloader</h2>
-<input type="text" id="videoUrl" placeholder="Enter video URL">
-<button onclick="downloadVideo()">Download</button>
-<div id="downloadLinks"></div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zeroex Downloader</title>
+    <style>
+        body { background: #121212; color: white; font-family: Arial, sans-serif; text-align: center; }
+        input, button { margin-top: 10px; padding: 10px; font-size: 16px; border-radius: 5px; }
+        input { width: 60%; background: #333; color: white; border: none; }
+        button { background: #444; color: white; cursor: pointer; }
+        button:hover { background: #555; }
+        #qualityOptions { margin-top: 20px; display: none; }
+    </style>
+</head>
+<body>
+    <h2>Zeroex Downloader</h2>
+    <input type="text" id="videoURL" placeholder="Paste video URL here">
+    <button onclick="downloadVideo()">Download</button>
+    
+    <div id="qualityOptions">
+        <button id="lowQuality">Low Quality</button>
+        <button id="highQuality">High Quality</button>
+        <button onclick="location.reload()">Download Another</button>
+    </div>
 
-<script>
-async function downloadVideo() {
-  const url = document.getElementById("videoUrl").value;
-  const response = await fetch("/downloader/api", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ url })
-  });
-  const data = await response.json();
-  document.getElementById("downloadLinks").innerHTML = 
-    `<a href="${data.data.high}" download>High Quality</a> | 
-     <a href="${data.data.low}" download>Low Quality</a>`;
-}
-</script>
+    <script>
+        async function downloadVideo() {
+            const url = document.getElementById("videoURL").value;
+            const response = await fetch("/downloader/api", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ url })
+            });
+
+            const data = await response.json();
+            if (data.status) {
+                document.getElementById("qualityOptions").style.display = "block";
+                document.getElementById("lowQuality").onclick = () => window.open(data.data.low);
+                document.getElementById("highQuality").onclick = () => window.open(data.data.high);
+            }
+        }
+    </script>
+</body>
+</html>
