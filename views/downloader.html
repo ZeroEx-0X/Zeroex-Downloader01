@@ -1,0 +1,19 @@
+<h2>Zeroex Downloader</h2>
+<input type="text" id="videoUrl" placeholder="Enter video URL">
+<button onclick="downloadVideo()">Download</button>
+<div id="downloadLinks"></div>
+
+<script>
+async function downloadVideo() {
+  const url = document.getElementById("videoUrl").value;
+  const response = await fetch("/downloader/api", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ url })
+  });
+  const data = await response.json();
+  document.getElementById("downloadLinks").innerHTML = 
+    `<a href="${data.data.high}" download>High Quality</a> | 
+     <a href="${data.data.low}" download>Low Quality</a>`;
+}
+</script>
