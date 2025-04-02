@@ -1,17 +1,37 @@
-<h2>ChatBot</h2>
-<div id="chatbox"></div>
-<input type="text" id="userInput">
-<button onclick="sendMessage()">Send</button>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zeroex ChatBot</title>
+    <style>
+        body { background: #121212; color: white; font-family: Arial, sans-serif; text-align: center; }
+        #chatBox { width: 80%; max-width: 400px; margin: 20px auto; padding: 10px; background: #1e1e1e; height: 300px; overflow-y: auto; border-radius: 10px; }
+        input, button { margin-top: 10px; padding: 10px; font-size: 16px; border-radius: 5px; }
+        input { width: 60%; background: #333; color: white; border: none; }
+        button { background: #444; color: white; cursor: pointer; }
+        button:hover { background: #555; }
+    </style>
+</head>
+<body>
+    <h2>Zeroex ChatBot</h2>
+    <div id="chatBox"></div>
+    <input type="text" id="chatInput" placeholder="Type a message...">
+    <button onclick="sendMessage()">Send</button>
 
-<script>
-async function sendMessage() {
-  const message = document.getElementById("userInput").value;
-  const response = await fetch("/chatbot/api", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ message })
-  });
-  const data = await response.json();
-  document.getElementById("chatbox").innerHTML += `<p>User: ${message}</p><p>Bot: ${data.reply}</p>`;
-}
-</script>
+    <script>
+        async function sendMessage() {
+            const message = document.getElementById("chatInput").value;
+            const response = await fetch("/chatbot/api", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ message })
+            });
+
+            const data = await response.json();
+            document.getElementById("chatBox").innerHTML += `<p>${data.reply}</p>`;
+            document.getElementById("chatInput").value = "";
+        }
+    </script>
+</body>
+</html>
