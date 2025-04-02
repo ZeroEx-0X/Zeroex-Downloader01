@@ -1,0 +1,20 @@
+<h2>Zeroex Remove Background</h2>
+<input type="file" id="imageInput">
+<button onclick="removeBackground()">Remove BG</button>
+<div id="output"></div>
+
+<script>
+async function removeBackground() {
+  const formData = new FormData();
+  formData.append("image", document.getElementById("imageInput").files[0]);
+
+  const response = await fetch("/rmbg/api", {
+    method: "POST",
+    body: formData
+  });
+
+  const data = await response.json();
+  document.getElementById("output").innerHTML = `<img src="${data.imageUrl}" alt="No BG Image">
+    <a href="${data.imageUrl}" download><button>Save Image</button></a>`;
+}
+</script>
