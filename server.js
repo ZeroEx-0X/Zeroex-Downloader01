@@ -66,17 +66,18 @@ app.post("/rmbg/api", upload.single("image"), async (req, res) => {
 app.post("/imagine/api", async (req, res) => {
   try {
     const { prompt } = req.body;
+    if (!prompt) {
+      return res.status(400).json({ error: "Prompt is required" });
+    }
+
     const apiUrl = `https://rubish-apihub.onrender.com/rubish//sdxl?prompt=${encodeURIComponent(prompt)}&apikey=rubish69`;
 
-    const response = await axios.get(apiUrl);
-    // Assuming the API returns a base64 image or an image URL
-    if (response.data && response.data.image) {
-      res.json({ imageUrl: response.data.image });
-    } else {
-      res.status(500).json({ error: "Failed to generate image. Try again!" });
-    }
+    const response = await axios.get(apiUrl, { responseType: "arraybuffer" });
+    const imageBase64 = Buffer.from(response.data, "binary").toString("base64");
+    res.json({ image: `data:image/png;base64,${imageBase64}` });
   } catch (error) {
-    res.status(500).json({ error: "Imagine API error" });
+    console.error("Imagine API error:", error.message); // Log error for debugging
+    res.status(500).json({ error: "Failed to generate image. Please try again!" });
   }
 });
 
