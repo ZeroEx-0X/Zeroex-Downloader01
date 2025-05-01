@@ -99,10 +99,40 @@
         document.getElementById("loading").style.display = "none";
 
         if (!response.ok || data.error) {
-          throw new Error(data.error || "Failed to generated-image");
+          throw new Error(data.error || "Failed to generate image");
         }
 
         if (data.image) {
-          // Generate a unique filename based on timestamp and prompt
+          // Generate a timestamp-based filename
           const timestamp = Date.now();
-          const sanitizedPrompt = prompt.replace(/[^a-zA-Z0-9]/
+          const filename = `image_${timestamp}.png`;
+
+          document.getElementById("imageResult").innerHTML = `
+            <img src="${data.image}" alt="Generated Image">
+            <div>
+              <button onclick="generateImage()">Retry</button>
+              <a href="${data.image}" download="${filename}"><button>Save</button></a>
+              <button onclick="newPrompt()">Create New</button>
+            </div>`;
+        } else {
+          throw new Error("No image returned");
+        }
+      } catch (error) {
+        document.getElementById("loading").style.display = "none";
+        showError(error.message || "An error occurred. Please try again!");
+      }
+    }
+
+    function showError(message) {
+      document.getElementById("error").innerText = message;
+      document.getElementById("error").style.display = "block";
+    }
+
+    function newPrompt() {
+      document.getElementById("promptInput").value = "";
+      document.getElementById("imageResult").innerHTML = "";
+      document.getElementById("error").style.display = "none";
+    }
+  </script>
+</body>
+</html>
