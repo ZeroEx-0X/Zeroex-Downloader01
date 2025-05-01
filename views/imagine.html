@@ -1,21 +1,82 @@
-<h2>Zeroex Imagine</h2>
-<input type="text" id="promptInput" placeholder="Enter your prompt">
-<button onclick="generateImage()">Generate</button>
-<div id="imageResult"></div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zeroex Imagine</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+    #promptInput { padding: 10px; width: 300px; margin: 10px; }
+    button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+    #imageResult { margin-top: 20px; }
+    #loading, #error { display: none; color: #333; }
+    #error { color: red; }
+    img { max-width: 100%; height: auto; }
+  </style>
+</head>
+<body>
+  <h2>Zeroex Imagine</h2>
+  <input type="text" id="promptInput" placeholder="Enter your prompt">
+  <button onclick="generateImage()">Generate</button>
+  <div id="loading">Loading...</div>
+  <div id="error"></div>
+  <div id="imageResult"></div>
 
-<script>
-async function generateImage() {
-  const prompt = document.getElementById("promptInput").value;
-  const response = await fetch("/imagine/api", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ prompt })
-  });
+  <script>
+    async function generateImage() {
+      const prompt = document.getElementById("promptInput").value.trim();
+      if (!prompt) {
+        showError("Please enter a prompt!");
+        return;
+      }
 
-  const data = await response.json();
-  document.getElementById("imageResult").innerHTML = `<img src="${data.imageUrl}" alt="Generated Image">
-    <button onclick="generateImage()">Retry</button>
-    <a href="${data.imageUrl}" download><button>Save</button></a>
-    <button onclick="location.reload()">Create New</button>`;
-}
-</script>
+      // Show loading, hide error and result
+      document.getElementById("loading").style.display = "block";
+      document.getElementById("error").style.display = "none";
+      document.getElementById("imageResult").innerHTML = "";
+
+      try {
+        const response = await fetch("/imagine/api", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ prompt })
+        });
+
+        const data = await response.json();
+
+        document.getElementById("loading").style.display = "none";
+
+        if (!response.ok || data.error) {
+          throw new Error(data.error || "Failed to generate image");
+        }
+
+        if (data.image) {
+          document.getElementById("imageResult").innerHTML = `
+            <img src="${data.image}" alt="Generated Image">
+            <div>
+              <button onclick="generateImage()">Retry</button>
+              <a href="${data.image}" download="generated-image.png"><button>Save</button></a>
+              <button onclick="newPrompt()">Create New</button>
+            </div>`;
+        } else {
+          throw new Error("No image returned");
+        }
+      } catch (error) {
+        document.getElementById("loading").style.display = "none";
+        showError(error.message || "An error occurred. Please try again!");
+      }
+    }
+
+    function showError(message) {
+      document.getElementById("error").innerText = message;
+      document.getElementById("error").style.display = "block";
+    }
+
+    function newPrompt() {
+      document.getElementById("promptInput").value = "";
+      document.getElementById("imageResult").innerHTML = "";
+      document.getElementById("error").style.display = "none";
+    }
+  </script>
+</body>
+</html>
