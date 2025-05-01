@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zeroex Audio Downloader</title>
+    <style>
+        body {
+            background-color: #121212;
+            color: white;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+            margin: 0;
+        }
+        h2 {
+            margin-top: 20px;
+            color: #ffffff;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        select, input {
+            padding: 10px;
+            width: 300px;
+            background-color: #1e1e1e;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        select:focus, input:focus {
+            outline: none;
+            border: 1px solid #6200ea;
+        }
+        input::placeholder {
+            color: #888;
+        }
+        button {
+            background: #6200ea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        button:hover {
+            background: #7c4dff;
+        }
+        #loading, #error {
+            display: none;
+            margin-top: 10px;
+        }
+        #error {
+            color: #ff4d4d;
+        }
+        #result {
+            margin-top: 20px;
+        }
+        a button {
+            background: #0288d1;
+        }
+        a button:hover {
+            background: #03a9f4;
+        }
+    </style>
+</head>
+<body>
+    <h2>Zeroex Audio Downloader</h2>
+    <div class="container">
+        <select id="sourceSelect">
+            <option value="" disabled selected>Select Audio Source</option>
+            <option value="yt">YouTube</option>
+            <option value="spotify">Spotify</option>
+            <option value="scloud">SoundCloud</option>
+        </select>
+        <input type="text" id="urlInput" placeholder="Enter audio URL">
+        <button onclick="downloadAudio()">Download</button>
+        <div id="loading">Loading...</div>
+        <div id="error"></div>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        async function downloadAudio() {
+            const source = document.getElementById("sourceSelect").value;
+            const url = document.getElementById("urlInput").value.trim();
+
+            if (!source) {
+                showError("Please select an audio source!");
+                return;
+            }
+            if (!url) {
+                showError("Please enter a valid URL!");
+                return;
+            }
+
+            // Show loading, hide error and result
+            document.getElementById("loading").style.display = "block";
+            document.getElementById("error").style.display = "none";
+            document.getElementById("result").innerHTML = "";
+
+            try {
+                const response = await fetch(`/audio-down/${source}`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ url })
+                });
+
+                const data = await response.json();
+
+                document.getElementById("loading").style.display = "none";
+
+                if (!response.ok || data.error) {
+                    throw new Error(data.error || "Failed to download audio");
+                }
+
+                if (data.audioUrl) {
+                    const timestamp = Date.now();
+                    const filename = `audio_${timestamp}.mp3`; // Assuming MP3 format
+                    document.getElementById("result").innerHTML = `
+                        <p>Audio ready for download!</p>
+                        <a href="${data.audioUrl}" download="${filename}"><button>Save Audio</button></a>
+                    `;
+                } else {
+                    throw new Error("No audio URL returned");
+                }
+            } catch (error) {
+                document.getElementById("loading").style.display = "none";
+                showError(error.message || "An error occurred. Please try again!");
+            }
+        }
+
+        function showError(message) {
+            document.getElementById("error").innerText = message;
+            document.getElementById("error").style.display = "block";
+        }
+    </script>
+</body>
+</html>
