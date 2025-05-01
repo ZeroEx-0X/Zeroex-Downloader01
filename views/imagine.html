@@ -5,13 +5,65 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Zeroex Imagine</title>
   <style>
-    body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
-    #promptInput { padding: 10px; width: 300px; margin: 10px; }
-    button { padding: 10px 20px; margin: 5px; cursor: pointer; }
-    #imageResult { margin-top: 20px; }
-    #loading, #error { display: none; color: #333; }
-    #error { color: red; }
-    img { max-width: 100%; height: auto; }
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+      background-color: #1a1a1a; /* Dark background */
+      color: #e0e0e0; /* Light text */
+      margin: 0;
+    }
+    h2 {
+      color: #ffffff; /* White heading */
+    }
+    #promptInput {
+      padding: 10px;
+      width: 300px;
+      margin: 10px;
+      background-color: #2c2c2c; /* Dark input background */
+      color: #e0e0e0; /* Light input text */
+      border: 1px solid #444;
+      border-radius: 5px;
+      outline: none;
+    }
+    #promptInput::placeholder {
+      color: #888; /* Subtle placeholder */
+    }
+    button {
+      padding: 10px 20px;
+      margin: 5px;
+      cursor: pointer;
+      background-color: #6200ea; /* Vibrant purple button */
+      color: #ffffff;
+      border: none;
+      border-radius: 5px;
+      transition: background-color 0.2s;
+    }
+    button:hover {
+      background-color: #7c4dff; /* Lighter purple on hover */
+    }
+    #imageResult {
+      margin-top: 20px;
+    }
+    #loading, #error {
+      display: none;
+      color: #e0e0e0;
+    }
+    #error {
+      color: #ff4d4d; /* Red for errors */
+    }
+    img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Subtle shadow for depth */
+    }
+    a button {
+      background-color: #0288d1; /* Blue for save button */
+    }
+    a button:hover {
+      background-color: #03a9f4; /* Lighter blue on hover */
+    }
   </style>
 </head>
 <body>
