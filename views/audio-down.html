@@ -61,6 +61,18 @@
         }
         #result {
             margin-top: 20px;
+            max-width: 600px;
+            text-align: left;
+        }
+        .search-result {
+            background: #1e1e1e;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .search-result:hover {
+            background: #333;
         }
         a button {
             background: #0288d1;
@@ -79,37 +91,96 @@
             <option value="spotify">Spotify</option>
             <option value="scloud">SoundCloud</option>
         </select>
-        <input type="text" id="urlInput" placeholder="Enter audio URL">
-        <button onclick="downloadAudio()">Download</button>
+        <input type="text" id="inputField" placeholder="Enter audio URL or search term">
+        <button onclick="processInput()">Process</button>
         <div id="loading">Loading...</div>
         <div id="error"></div>
         <div id="result"></div>
     </div>
 
     <script>
-        async function downloadAudio() {
+        let currentSource = "";
+        let currentSearchResults = [];
+
+        async function processInput() {
             const source = document.getElementById("sourceSelect").value;
-            const url = document.getElementById("urlInput").value.trim();
+            const input = document.getElementById("inputField").value.trim();
 
             if (!source) {
                 showError("Please select an audio source!");
                 return;
             }
-            if (!url) {
-                showError("Please enter a valid URL!");
+            if (!input) {
+                showError("Please enter a URL or search term!");
                 return;
             }
 
-            // Show loading, hide error and result
+            currentSource = source;
             document.getElementById("loading").style.display = "block";
             document.getElementById("error").style.display = "none";
             document.getElementById("result").innerHTML = "";
 
             try {
+                const isUrl = input.includes("http");
+                const payload = isUrl ? { url: input } : { search: input };
                 const response = await fetch(`/audio-down/${source}`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ url })
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+
+                document.getElementById("loading").style.display = "none";
+
+                if (!response.ok || data.error) {
+                    throw new Error(data.error || "Failed to process request");
+                }
+
+                if (data.searchResults) {
+                    currentSearchResults = data.searchResults;
+                    let resultHtml = "<p>Select a song to download:</p>";
+                    data.searchResults.forEach(song => {
+                        resultHtml += `
+                            <div class="search-result" onclick="downloadSelected(${song.index})">
+                                ${song.index}. ${song.title} ${song.artist ? `- ${song.artist}` : ""}
+                                ${song.duration ? `(${song.duration})` : ""}
+                            </div>`;
+                    });
+                    document.getElementById("result").innerHTML = resultHtml;
+                } else if (data.audioUrl) {
+                    const timestamp = Date.now();
+                    const filename = `audio_${timestamp}.mp3`;
+                    document.getElementById("result").innerHTML = `
+                        <p>Audio ready for download!</p>
+                        <p>${data.title}${data.artist ? ` - ${data.artist}` : ""}${data.duration ? ` (${data.duration})` : ""}</p>
+                        <a href="${data.audioUrl}" download="${filename}"><button>Save Audio</button></a>
+                    `;
+                } else {
+                    throw new Error("No audio URL or search results returned");
+                }
+            } catch (error) {
+                document.getElementById("loading").style.display = "none";
+                showError(error.message || "An error occurred. Please try again!");
+            }
+        }
+
+        async function downloadSelected(index) {
+            const song = currentSearchResults.find(s => s.index === index);
+            if (!song) {
+                showError("Invalid selection!");
+                return;
+            }
+
+            document.getElementById("loading").style.display = "block";
+            document.getElementById("error").style.display = "none";
+            document.getElementById("result").innerHTML = "";
+
+            try {
+                const response = await fetch(`/audio-down/${currentSource}`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ url: song.url || `https://www.youtube.com/watch?v=${song.id}` })
                 });
 
                 const data = await response.json();
@@ -122,9 +193,10 @@
 
                 if (data.audioUrl) {
                     const timestamp = Date.now();
-                    const filename = `audio_${timestamp}.mp3`; // Assuming MP3 format
+                    const filename = `audio_${timestamp}.mp3`;
                     document.getElementById("result").innerHTML = `
                         <p>Audio ready for download!</p>
+                        <p>${data.title}${data.artist ? ` - ${data.artist}` : ""}${data.duration ? ` (${data.duration})` : ""}</p>
                         <a href="${data.audioUrl}" download="${filename}"><button>Save Audio</button></a>
                     `;
                 } else {
