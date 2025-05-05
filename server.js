@@ -14,7 +14,7 @@ const PORT = process.env.PORT || 3050;
 app.use(cors());
 
 // Serve static files from the "public" folder
-app.use(express.static(path<HTMLDivElement>.join(__dirname, "public")));
+app.use(express.static(path.join(__dirname, "public")));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
