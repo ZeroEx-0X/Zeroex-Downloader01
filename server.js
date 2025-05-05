@@ -14,7 +14,7 @@ const PORT = process.env.PORT || 3050;
 app.use(cors());
 
 // Serve static files from the "public" folder
-app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static(path<HTMLDivElement>.join(__dirname, "public")));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -35,10 +35,10 @@ app.get("/imagine", (req, res) => res.sendFile(path.join(__dirname, "views", "im
 app.get("/audio-down", (req, res) => res.sendFile(path.join(__dirname, "views", "audio-down.html")));
 
 // ChatBot API
-app.post("/chatbot/api", async (req, res) => {
+app.get("/chatbot/api", async (req, res) => {
   try {
-    const { message } = req.body;
-    const response = await axios.post("https://zerox-chat-bot-api.onrender.com/chat", { message });
+    const { message } = req.query;
+    const response = await axios.get(`https://zerox-chat-bot-api.onrender.com/chat?message=${encodeURIComponent(message)}`);
     res.json(response.data);
   } catch (error) {
     res.status(500).json({ error: "Chatbot API error" });
